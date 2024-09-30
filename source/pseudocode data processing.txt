@@ -1,0 +1,61 @@
+1. Fungsi extractTable:
+   Input: DataFrame kosong, filename, sheetname, baris awal, kolom, tahun, bulan
+   Output: DataFrame dengan data dari Excel
+   Jika tahun dan bulan diberikan, tambahkan kolom DATE dengan tanggal (tahun, bulan, 1)
+   Return DataFrame
+
+2. Fungsi dataProcessing:
+   Input: DataFrame, list kolom, konten pengisian (fillContent)
+   Loop setiap kolom dalam list kolom:
+     Isi nilai yang kosong (NaN) dengan fillContent
+   Return DataFrame
+
+3. Fungsi replaceRowsValue:
+   Input: DataFrame, list sebelum, list sesudah
+   Loop setiap pasangan nilai (before, after) dalam list sebelum dan sesudah:
+     Ganti nilai before dengan after dalam DataFrame
+   Return DataFrame
+
+4. Fungsi renameColumns:
+   Input: DataFrame, list kolom baru
+   Rename kolom DataFrame dengan kolom baru dari list
+   Return DataFrame
+
+5. Fungsi tablebySheetMonths:
+   Input: DataFrame kosong, filename, tahun, baris awal, list bulan, kolom
+   Loop setiap bulan dalam list bulan:
+     Panggil extractTable dengan bulan dan tahun untuk setiap sheet
+     Gabungkan hasil DataFrame dengan DataFrame utama
+   Return DataFrame
+
+6. Fungsi tablebySheetYears:
+   Input: DataFrame kosong, filename, sheetname, baris awal, kolom, list tahun
+   Loop setiap tahun dalam list:
+     Panggil extractTable dengan tahun untuk setiap sheet
+     Gabungkan hasil DataFrame dengan DataFrame utama
+   Return DataFrame
+
+7. Fungsi fixCustomersName:
+   Input: DataFrame, list indeks baris dengan pelanggan kosong
+   Loop setiap indeks:
+     Jika nilai SO di baris sebelumnya > 0, isi nilai CUSTOMER dengan nilai CUSTOMER di baris sebelumnya
+     Jika tidak, hapus baris tersebut
+   Return DataFrame
+
+8. Ekstrak data dari file Excel untuk tahun 2018 hingga 2024 dengan extractTable
+   Simpan hasil dalam rekapan_iso_2018, rekapan_iso_2019, ..., rekapan_iso_2024
+
+9. Rename kolom dalam setiap rekapan tahun dengan renameColumns
+
+10. Isi nilai kosong dalam kolom INTERNAL, EKSTERNAL, SO, CUSTOMER dengan dataProcessing
+
+11. Filter DataFrame: Hanya simpan baris dengan nilai SO > 0 dalam setiap rekapan
+
+12. Perbaiki nama pelanggan dengan fixCustomersName dan replaceRowsValue:
+    Ganti nama pelanggan yang salah dengan yang benar sesuai list
+
+13. Gabungkan semua rekapan tahun menjadi satu DataFrame
+
+14. Simpan hasil ke file Excel dalam beberapa sheet berdasarkan tahun dengan pd.ExcelWriter
+
+15. Cetak daftar pelanggan yang sudah bersih dan tidak terduplikasi

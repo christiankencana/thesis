@@ -1,0 +1,49 @@
+1. Fungsi extractTable:
+   - Input: DataFrame kosong, filename, sheetname, baris awal, kolom, tahun, bulan
+   - Baca data dari file Excel
+   - Jika tahun dan bulan diberikan, tambahkan kolom DATE
+   - Return DataFrame dengan data yang diekstrak
+
+2. Fungsi dataProcessing:
+   - Input: DataFrame, list kolom, nilai pengganti
+   - Isi nilai kosong (NaN) pada kolom yang diberikan dengan nilai pengganti
+   - Return DataFrame
+
+3. Fungsi replaceRowsValue:
+   - Input: DataFrame, list nilai sebelum, list nilai sesudah
+   - Ganti nilai pada list "sebelum" dengan nilai pada list "sesudah"
+   - Return DataFrame
+
+4. Fungsi renameColumns:
+   - Input: DataFrame, dict nama kolom baru
+   - Ubah nama kolom sesuai dengan dict yang diberikan
+   - Return DataFrame
+
+5. Fungsi tablebySheetMonths:
+   - Input: DataFrame kosong, filename, tahun, baris awal, list bulan, kolom
+   - Loop melalui list bulan:
+     - Ekstrak data dari sheet berdasarkan bulan dan gabungkan ke DataFrame utama
+   - Return DataFrame gabungan
+
+6. Fungsi fixCustomersName:
+   - Input: DataFrame, list indeks baris dengan nama pelanggan kosong
+   - Untuk setiap indeks:
+     - Jika SO > 0 di baris sebelumnya, isi kolom CUSTOMER dengan nilai dari baris sebelumnya
+     - Jika tidak, hapus baris tersebut
+   - Return DataFrame
+
+7. Baca data dari file Excel untuk setiap tahun (2018-2024) menggunakan extractTable
+
+8. Rename kolom pada tiap DataFrame sesuai dengan dict yang telah ditentukan menggunakan renameColumns
+
+9. Isi nilai kosong pada kolom tertentu (INTERNAL, EKSTERNAL, SO, CUSTOMER) dengan nilai default menggunakan dataProcessing
+
+10. Filter baris dengan nilai SO > 0
+
+11. Perbaiki nama pelanggan yang salah menggunakan replaceRowsValue dengan list pelanggan yang benar
+
+12. Gabungkan semua DataFrame tahun menjadi satu DataFrame
+
+13. Simpan hasil akhir ke file Excel baru dengan sheet per tahun
+
+14. Cetak daftar pelanggan yang unik dan tersortir
