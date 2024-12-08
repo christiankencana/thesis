@@ -10,10 +10,10 @@ st.set_page_config(
     )
 st.write("# ACJ Forecasting App")
 
-report_year = st.Page("report-year.py", title="Report Year", icon=":material/add_circle:")
-# report_month = st.Page("report-month.py", title="Report", icon=":material/add_circle:")
-report_detail = st.Page("report-detail.py", title="Report Detail", icon=":material/add_circle:")
 about = st.Page("about.py", title="About", icon=":material/delete:")
+report_statistic = st.Page("report-statistic.py", title="Report Statistic", icon=":material/add_circle:")
+report_model_month = st.Page("report-model-month.py", title="Report Month", icon=":material/add_circle:")
+report_model_year = st.Page("report-model-year.py", title="Report Year", icon=":material/add_circle:")
 
-pg = st.navigation([report_detail, report_year, about])
+pg = st.navigation([about, report_statistic, report_model_month, report_model_year ])
 pg.run()
