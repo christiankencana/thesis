@@ -28,17 +28,26 @@ if uploaded_file:
     # Create 'Year' column to group by year
     data_filtered['Year'] = data_filtered['Tanggal'].dt.year
 
-    # Group by Year to get yearly summary (sum of SO per year)
+    # Group by Year to get yearly summary (sum of selected column per year)
     yearly_summary = data_filtered.groupby('Year').agg({
-        'SO': 'sum'
+        'SO': 'sum',
+        'Terkirim': 'sum',
+        'Harga Komoditas': 'mean',
+        'Indeks Produksi': 'mean',
+        'Data Inflasi': 'mean',
+        'Kurs': 'mean'
     }).reset_index()
 
     # Display yearly summary
-    st.write("Yearly Summary (Total SO per Year):")
+    st.write("Yearly Summary (Aggregated Data):")
     st.write(yearly_summary)
 
+    # Dropdown to select the column to forecast
+    column_to_forecast = st.selectbox("Select the column to forecast", 
+                                      options=['SO', 'Terkirim', 'Harga Komoditas', 'Indeks Produksi', 'Data Inflasi', 'Kurs'])
+
     # Set alpha value for Triple Exponential Smoothing (TES)
-    alpha = 0.1
+    alpha = 0.5
 
     # Initialize columns for TES and error metrics
     yearly_summary['Single'] = np.nan
@@ -54,9 +63,9 @@ if uploaded_file:
     yearly_summary['MAPE'] = np.nan
 
     # Initialize first row with initial values
-    yearly_summary.loc[0, 'Single'] = yearly_summary.loc[0, 'SO']
-    yearly_summary.loc[0, 'Double'] = yearly_summary.loc[0, 'SO']
-    yearly_summary.loc[0, 'Triple'] = yearly_summary.loc[0, 'SO']
+    yearly_summary.loc[0, 'Single'] = yearly_summary.loc[0, column_to_forecast]
+    yearly_summary.loc[0, 'Double'] = yearly_summary.loc[0, column_to_forecast]
+    yearly_summary.loc[0, 'Triple'] = yearly_summary.loc[0, column_to_forecast]
     yearly_summary.loc[0, 'At'] = (2 * yearly_summary.loc[0, 'Single']) - yearly_summary.loc[0, 'Double']
     yearly_summary.loc[0, 'Bt'] = 0  # Initial trend (Bt) set to 0
     yearly_summary.loc[0, 'Ct'] = 0  # Initial trend (Ct) set to 0
@@ -64,7 +73,7 @@ if uploaded_file:
     # Apply TES formula and calculate error metrics for each subsequent row
     for i in range(1, len(yearly_summary)):
         # Single Exponential smoothing (S't)
-        yearly_summary.loc[i, 'Single'] = (alpha * yearly_summary.loc[i, 'SO']) + ((1 - alpha) * yearly_summary.loc[i-1, 'Single'])
+        yearly_summary.loc[i, 'Single'] = (alpha * yearly_summary.loc[i, column_to_forecast]) + ((1 - alpha) * yearly_summary.loc[i-1, 'Single'])
         
         # Double Exponential smoothing (S''t)
         yearly_summary.loc[i, 'Double'] = (alpha * yearly_summary.loc[i, 'Single']) + ((1 - alpha) * yearly_summary.loc[i-1, 'Double'])
@@ -86,7 +95,7 @@ if uploaded_file:
             yearly_summary.loc[i, 'TES Forecast'] = yearly_summary.loc[i-1, 'At'] + yearly_summary.loc[i-1, 'Bt']
         
         # Error (actual - forecast)
-        yearly_summary.loc[i, 'Error'] = yearly_summary.loc[i, 'SO'] - yearly_summary.loc[i, 'TES Forecast']
+        yearly_summary.loc[i, 'Error'] = yearly_summary.loc[i, column_to_forecast] - yearly_summary.loc[i, 'TES Forecast']
         
         # MAD (Mean Absolute Deviation)
         yearly_summary.loc[i, 'MAD'] = abs(yearly_summary.loc[i, 'Error'])
@@ -95,13 +104,13 @@ if uploaded_file:
         yearly_summary.loc[i, 'MSE'] = yearly_summary.loc[i, 'Error'] ** 2
         
         # MAPE (Mean Absolute Percentage Error)
-        if yearly_summary.loc[i, 'SO'] != 0:
-            yearly_summary.loc[i, 'MAPE'] = (abs(yearly_summary.loc[i, 'Error']) / yearly_summary.loc[i, 'SO']) * 100
+        if yearly_summary.loc[i, column_to_forecast] != 0:
+            yearly_summary.loc[i, 'MAPE'] = (abs(yearly_summary.loc[i, 'Error']) / yearly_summary.loc[i, column_to_forecast]) * 100
         else:
             yearly_summary.loc[i, 'MAPE'] = np.nan
 
     # Show the result with TES forecast and error metrics
-    st.write("Yearly TES Forecast and Error Metrics:")
+    st.write(f"Yearly - {column_to_forecast} - TES Forecast and Error Metrics:")
     st.write(yearly_summary)
 
     # Forecast for future years (6 years ahead)
@@ -113,11 +122,11 @@ if uploaded_file:
     # Generate dummy years starting from the next year after the last year in the original data
     dummy_years = pd.DataFrame({
         'Year': range(last_year + 1, last_year + 1 + years_to_forecast),
-        'SO': np.zeros(years_to_forecast)  # Set SO to 0 for future years
+        column_to_forecast: np.zeros(years_to_forecast)  # Set selected column to 0 for future years
     })
 
     # Combine original data with the dummy future data
-    extended_data = pd.concat([yearly_summary[['Year', 'SO']], dummy_years], ignore_index=True)
+    extended_data = pd.concat([yearly_summary[['Year', column_to_forecast]], dummy_years], ignore_index=True)
 
     # Initialize columns for TES forecast in the extended data
     extended_data['Single'] = np.nan
@@ -133,9 +142,9 @@ if uploaded_file:
     extended_data['MAPE'] = np.nan
 
     # Initialize first row with initial values for forecasting
-    extended_data.loc[0, 'Single'] = extended_data.loc[0, 'SO']
-    extended_data.loc[0, 'Double'] = extended_data.loc[0, 'SO']
-    extended_data.loc[0, 'Triple'] = extended_data.loc[0, 'SO']
+    extended_data.loc[0, 'Single'] = extended_data.loc[0, column_to_forecast]
+    extended_data.loc[0, 'Double'] = extended_data.loc[0, column_to_forecast]
+    extended_data.loc[0, 'Triple'] = extended_data.loc[0, column_to_forecast]
     extended_data.loc[0, 'At'] = (2 * extended_data.loc[0, 'Single']) - extended_data.loc[0, 'Double']
     extended_data.loc[0, 'Bt'] = 0  # Assume no initial trend
     extended_data.loc[0, 'Ct'] = 0  # Assume no initial trend
@@ -143,7 +152,7 @@ if uploaded_file:
     # Apply TES formula to historical data and future periods
     for i in range(1, len(extended_data)):
         # Apply TES for historical and future periods
-        extended_data.loc[i, 'Single'] = (alpha * extended_data.loc[i, 'SO']) + ((1 - alpha) * extended_data.loc[i-1, 'Single'])
+        extended_data.loc[i, 'Single'] = (alpha * extended_data.loc[i, column_to_forecast]) + ((1 - alpha) * extended_data.loc[i-1, 'Single'])
         extended_data.loc[i, 'Double'] = (alpha * extended_data.loc[i, 'Single']) + ((1 - alpha) * extended_data.loc[i-1, 'Double'])
         extended_data.loc[i, 'Triple'] = (alpha * extended_data.loc[i, 'Double']) + ((1 - alpha) * extended_data.loc[i-1, 'Triple'])
         extended_data.loc[i, 'At'] = (3 * extended_data.loc[i, 'Single']) - (3 * extended_data.loc[i, 'Double']) + extended_data.loc[i, 'Triple']
@@ -152,32 +161,32 @@ if uploaded_file:
         extended_data.loc[i, 'TES Forecast'] = extended_data.loc[i-1, 'At'] + extended_data.loc[i-1, 'Bt']
         
         # Error metrics
-        extended_data.loc[i, 'Error'] = extended_data.loc[i, 'SO'] - extended_data.loc[i, 'TES Forecast']
+        extended_data.loc[i, 'Error'] = extended_data.loc[i, column_to_forecast] - extended_data.loc[i, 'TES Forecast']
         extended_data.loc[i, 'MAD'] = abs(extended_data.loc[i, 'Error'])
         extended_data.loc[i, 'MSE'] = extended_data.loc[i, 'Error'] ** 2
-        if extended_data.loc[i, 'SO'] != 0:
-            extended_data.loc[i, 'MAPE'] = (abs(extended_data.loc[i, 'Error']) / extended_data.loc[i, 'SO']) * 100
+        if extended_data.loc[i, column_to_forecast] != 0:
+            extended_data.loc[i, 'MAPE'] = (abs(extended_data.loc[i, 'Error']) / extended_data.loc[i, column_to_forecast]) * 100
         else:
             extended_data.loc[i, 'MAPE'] = np.nan
 
     # Display the extended data with future forecasts
-    st.write("Forecasted Data with TES and Error Metrics:")
+    st.write(f"Forecasted Data - {column_to_forecast} - TES and Error Metrics:")
     st.write(extended_data)
 
-    # Plot: Actual SO vs TES Forecast
-    st.write("Plot: Actual SO vs TES Forecast")
+    # Plot: Actual vs TES Forecast
+    st.write(f"Plot: Actual {column_to_forecast} vs TES Forecast")
     fig, ax = plt.subplots(figsize=(14, 6))
-    ax.plot(extended_data['Year'], extended_data['SO'], label='Actual SO', marker='o')
+    ax.plot(extended_data['Year'], extended_data[column_to_forecast], label=f'Actual {column_to_forecast}', marker='o')
     ax.plot(extended_data['Year'], extended_data['TES Forecast'], label='TES Forecast', marker='x')
     ax.set_xlabel('Year')
-    ax.set_ylabel('SO')
-    ax.set_title('Actual SO vs TES Forecast')
+    ax.set_ylabel(column_to_forecast)
+    ax.set_title(f'Actual {column_to_forecast} vs TES Forecast')
     ax.legend()
     plt.xticks(rotation=45)
     st.pyplot(fig)
 
     # Plot: Error Evaluation
-    st.write("Plot: Error and Evaluation Metrics")
+    st.write(f"Plot: Error and Evaluation Metrics for {column_to_forecast}")
     fig, ax = plt.subplots(figsize=(14, 8))
     ax.plot(extended_data['Year'].astype(str), extended_data['Error'], label='Error', marker='o', color='red')
     ax.plot(extended_data['Year'].astype(str), extended_data['MAD'], label='MAD', marker='x', color='blue')
@@ -185,7 +194,7 @@ if uploaded_file:
     ax.plot(extended_data['Year'].astype(str), extended_data['MAPE'], label='MAPE', marker='^', color='purple')
     ax.set_xlabel('Year')
     ax.set_ylabel('Error Metrics')
-    ax.set_title('Error and Evaluation Metrics (Error, MAD, MSE, MAPE)')
+    ax.set_title(f'Error and Evaluation Metrics ({column_to_forecast}): Error, MAD, MSE, MAPE')
     ax.legend()
     plt.xticks(rotation=45)
     st.pyplot(fig)
