@@ -46,6 +46,9 @@ if uploaded_file:
     column_to_forecast = st.selectbox("Select the column to forecast", 
                                       options=['SO', 'Terkirim', 'Harga Komoditas', 'Indeks Produksi', 'Data Inflasi', 'Kurs'])
 
+    # Slider for the number of years to forecast
+    years_to_forecast = st.slider("Select how many years to forecast", min_value=1, max_value=10, value=6)
+
     # Set alpha value for Triple Exponential Smoothing (TES)
     alpha = 0.5
 
@@ -113,10 +116,7 @@ if uploaded_file:
     st.write(f"Yearly - {column_to_forecast} - TES Forecast and Error Metrics:")
     st.write(yearly_summary)
 
-    # Forecast for future years (6 years ahead)
-    years_to_forecast = 6
-
-    # Get the last year from the original data
+    # Forecast for future years based on the selected number of years
     last_year = yearly_summary['Year'].max()
 
     # Generate dummy years starting from the next year after the last year in the original data

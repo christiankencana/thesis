@@ -45,6 +45,9 @@ if uploaded_file:
     # Allow user to select the column to forecast
     selected_column = st.selectbox("Select the column to forecast", ['SO', 'Terkirim', 'Harga Komoditas', 'Indeks Produksi', 'Data Inflasi', 'Kurs'])
 
+    # Select the number of months to forecast
+    months_to_forecast = st.slider("Select how many months to forecast", min_value=1, max_value=24, value=12)
+
     # Set alpha value for Double Exponential Smoothing (DES)
     alpha = 0.5
 
@@ -101,9 +104,7 @@ if uploaded_file:
     st.write(f"Monthly - {selected_column} - DES Forecast and Error Metrics:")
     st.write(monthly_summary)
 
-    # Forecast for future months (12 months ahead)
-    months_to_forecast = 12
-
+    # Forecast for future months based on user input
     # Get the last month from the original data
     last_month = monthly_summary['bulan_tahun'].max().to_timestamp()
 
