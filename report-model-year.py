@@ -172,6 +172,24 @@ if uploaded_file:
     # Display the extended data with future forecasts
     st.write(f"Forecasted Data - {column_to_forecast} - TES and Error Metrics:")
     st.write(extended_data)
+    
+    # Filter the extended data to exclude the future rows (where actual data is zero or NaN)
+    actual_data = extended_data[extended_data[column_to_forecast] != 0]
+
+    # Calculate the mean values for MAD, MSE, and MAPE (only for rows with actual data)
+    mean_MAD = actual_data['MAD'].mean()
+    mean_MSE = actual_data['MSE'].mean()
+    mean_MAPE = actual_data['MAPE'].mean()
+
+    # Round the results to two decimal places
+    mean_MAD_rounded = round(mean_MAD, 2)
+    mean_MSE_rounded = round(mean_MSE, 2)
+    mean_MAPE_rounded = round(mean_MAPE, 2)
+
+    # Display the average MAD, MSE, and MAPE (rounded to two decimal places)
+    st.write(f"Average MAD (Mean Absolute Deviation) for Actual Data: {mean_MAD_rounded}")
+    st.write(f"Average MSE (Mean Squared Error) for Actual Data: {mean_MSE_rounded}")
+    st.write(f"Average MAPE (Mean Absolute Percentage Error) for Actual Data: {mean_MAPE_rounded}%")
 
     # Plot: Actual vs TES Forecast
     st.write(f"Plot: Actual {column_to_forecast} vs TES Forecast")
@@ -186,7 +204,7 @@ if uploaded_file:
     st.pyplot(fig)
 
     # Plot: Error Evaluation Metrics (Error, MAD, MSE, MAPE)
-    st.write("Plot: Error and Evaluation Metrics (Error, MAD, MSE, MAPE)")
+    st.write(f"Plot: Error and Evaluation Metrics (Error, MAD, MSE, MAPE) for {column_to_forecast} ")
     fig, ax = plt.subplots(figsize=(14, 8))
     ax.plot(extended_data['Year'].astype(str), extended_data['Error'], label='Error', marker='o', color='red')
     ax.plot(extended_data['Year'].astype(str), extended_data['MAD'], label='MAD', marker='x', color='blue')
@@ -194,36 +212,36 @@ if uploaded_file:
     ax.plot(extended_data['Year'].astype(str), extended_data['MAPE'], label='MAPE', marker='^', color='purple')
     ax.set_xlabel('Year')
     ax.set_ylabel('Error Metrics')
-    ax.set_title('Error and Evaluation Metrics (Error, MAD, MSE, MAPE)')
+    ax.set_title(f'Error and Evaluation Metrics (Error, MAD, MSE, MAPE) for {column_to_forecast}')
     ax.legend()
     plt.xticks(rotation=45)
     st.pyplot(fig)
 
     # Plot: Error Evaluation Metrics (MAD)
-    st.write("Plot: Error and Evaluation Metrics (MAD)")
+    st.write(f"Plot: Error and Evaluation Metrics (MAD) for {column_to_forecast}")
     fig, ax = plt.subplots(figsize=(14, 8))
     # ax.plot(extended_data['Year'].astype(str), extended_data['Error'], label='Error', marker='o', color='red')
     ax.plot(extended_data['Year'].astype(str), extended_data['MAD'], label='MAD', marker='x', color='blue')
     ax.set_xlabel('Year')
     ax.set_ylabel('Error Metrics')
-    ax.set_title('Error and Evaluation Metrics (MAD)')
+    ax.set_title(f'Error and Evaluation Metrics (MAD) for {column_to_forecast}')
     ax.legend()
     plt.xticks(rotation=45)
     st.pyplot(fig)
     
     # Plot: Error Evaluation Metrics (MSE)
-    st.write("Plot: Error and Evaluation Metrics (MSE)")
+    st.write(f"Plot: Error and Evaluation Metrics (MSE) for {column_to_forecast}")
     fig, ax = plt.subplots(figsize=(14, 8))
     ax.plot(extended_data['Year'].astype(str), extended_data['MSE'], label='MSE', marker='s', color='green')
     ax.set_xlabel('Year')
     ax.set_ylabel('Error Metrics')
-    ax.set_title('Error and Evaluation Metrics (MSE)')
+    ax.set_title(f'Error and Evaluation Metrics (MSE) for {column_to_forecast}')
     ax.legend()
     plt.xticks(rotation=45)
     st.pyplot(fig)
     
     # Plot: Error Evaluation Metrics (MAPE)
-    st.write("Plot: Error and Evaluation Metrics (MAPE)")
+    st.write(f"Plot: Error and Evaluation Metrics (MAPE) for {column_to_forecast}")
     fig, ax = plt.subplots(figsize=(14, 8))
     ax.plot(extended_data['Year'].astype(str), extended_data['Error'], label='Error', marker='o', color='red')
     ax.plot(extended_data['Year'].astype(str), extended_data['MAD'], label='MAD', marker='x', color='blue')
@@ -231,7 +249,7 @@ if uploaded_file:
     ax.plot(extended_data['Year'].astype(str), extended_data['MAPE'], label='MAPE', marker='^', color='purple')
     ax.set_xlabel('Year')
     ax.set_ylabel('Error Metrics')
-    ax.set_title('Error and Evaluation Metrics (MAPE)')
+    ax.set_title(f'Error and Evaluation Metrics (MAPE) for {column_to_forecast}')
     ax.legend()
     plt.xticks(rotation=45)
     st.pyplot(fig)
